@@ -5,8 +5,8 @@ spring:
   application:
     name: user-service
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/userdb}
-    username: ${SPRING_DATASOURCE_USERNAME:root}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/focusflow}
+    username: ${SPRING_DATASOURCE_USERNAME:focusflow_user}
     password: ${SPRING_DATASOURCE_PASSWORD:password}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
