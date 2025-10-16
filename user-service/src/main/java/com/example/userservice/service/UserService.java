@@ -63,8 +63,8 @@ public class UserService implements UserDetailsService {
             throw new RuntimeException("Invalid username or password!");
         }
         
-        // Generate JWT token
-        String token = jwtUtil.generateToken(user.getUsername());
+    // Generate JWT token (include numeric user id claim)
+    String token = jwtUtil.generateToken(user.getUsername(), user.getId());
         
         return new LoginResponse(token, user.getUsername(), user.getEmail());
     }

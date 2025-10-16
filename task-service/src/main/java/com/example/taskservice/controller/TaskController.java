@@ -1,18 +1,19 @@
 package com.example.taskservice.controller;
 
 import com.example.taskservice.entity.Task;
+import com.example.taskservice.dto.CreateTaskRequest;
 import com.example.taskservice.entity.Status;
 import com.example.taskservice.service.TaskService;
 import com.example.taskservice.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,6 +22,7 @@ import java.util.Optional;
 @RequestMapping("/api/tasks")
 @CrossOrigin(origins = "*")
 public class TaskController {
+    private static final Logger logger = LoggerFactory.getLogger(TaskController.class);
     
     @Autowired
     private TaskService taskService;
@@ -33,10 +35,16 @@ public class TaskController {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             try {
+                // Try to get numeric userId claim first (added by user-service). Fallback to subject parsing.
+                Long userId = jwtUtil.getUserIdFromToken(token);
+                if (userId != null) return userId;
                 String username = jwtUtil.getUsernameFromToken(token);
-                // In a real application, you would fetch the user ID from the database using username
-                // For this example, we'll use a simple mapping or extract from token claims
-                return Long.parseLong(username); // Assuming username is the user ID for simplicity
+                // Fallback: if subject contains numeric id, parse it (legacy behavior)
+                try {
+                    return Long.parseLong(username);
+                } catch (NumberFormatException ex) {
+                    return null;
+                }
             } catch (Exception e) {
                 return null;
             }
@@ -44,14 +52,30 @@ public class TaskController {
         return null;
     }
     
-    @GetMapping
-    public ResponseEntity<?> getAllTasks(HttpServletRequest request) {
+    @GetMapping(path = {"", "/"})
+    public ResponseEntity<?> getAllTasks(@RequestParam(required = false) Status status,
+                                         @RequestParam(required = false) com.example.taskservice.entity.Priority priority,
+                                         HttpServletRequest request) {
         Long userId = getUserIdFromToken(request);
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Invalid or missing token"));
         }
-        
+
+        // Prefer status-based query when provided. If both provided, apply both filters.
+        if (status != null && priority != null) {
+            List<Task> tasksByStatus = taskService.getTasksByStatus(userId, status);
+            // filter by priority
+            tasksByStatus.removeIf(t -> !t.getPriority().equals(priority));
+            return ResponseEntity.ok(tasksByStatus);
+        } else if (status != null) {
+            List<Task> tasks = taskService.getTasksByStatus(userId, status);
+            return ResponseEntity.ok(tasks);
+        } else if (priority != null) {
+            List<Task> tasks = taskService.getTasksByPriority(userId, priority);
+            return ResponseEntity.ok(tasks);
+        }
+
         List<Task> tasks = taskService.getAllTasksByUserId(userId);
         return ResponseEntity.ok(tasks);
     }
@@ -73,28 +97,50 @@ public class TaskController {
         }
     }
     
-    @PostMapping
-    public ResponseEntity<?> createTask(@Valid @RequestBody Task task, HttpServletRequest request) {
-        Long userId = getUserIdFromToken(request);
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Invalid or missing token"));
+    @PostMapping(path = {"", "/"})
+    public ResponseEntity<?> createTask(@Valid @RequestBody CreateTaskRequest createRequest, HttpServletRequest request) {
+        logger.debug("Incoming createTask request: {}", createRequest);
+        try {
+            Long userId = getUserIdFromToken(request);
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Invalid or missing token"));
+            }
+
+            // Map DTO to entity and set the userId from the JWT claim before validation/persistence
+            Task task = new Task();
+            task.setTitle(createRequest.getTitle());
+            task.setDescription(createRequest.getDescription());
+            task.setPriority(createRequest.getPriority());
+            task.setStatus(createRequest.getStatus());
+            task.setDueDate(createRequest.getDueDate());
+            task.setUserId(userId);
+
+            Task createdTask = taskService.createTask(task);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
+        } catch (Exception e) {
+            logger.error("Error creating task", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
-        
-        task.setUserId(userId);
-        Task createdTask = taskService.createTask(task);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateTask(@PathVariable Long id, @Valid @RequestBody Task taskDetails, 
+    public ResponseEntity<?> updateTask(@PathVariable Long id, @Valid @RequestBody CreateTaskRequest updateRequest, 
                                        HttpServletRequest request) {
         Long userId = getUserIdFromToken(request);
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Invalid or missing token"));
         }
-        
+
+        // Map DTO to a Task object (userId will be enforced from existing entity)
+        Task taskDetails = new Task();
+        taskDetails.setTitle(updateRequest.getTitle());
+        taskDetails.setDescription(updateRequest.getDescription());
+        taskDetails.setPriority(updateRequest.getPriority());
+        taskDetails.setStatus(updateRequest.getStatus());
+        taskDetails.setDueDate(updateRequest.getDueDate());
+
         Optional<Task> updatedTask = taskService.updateTask(id, taskDetails, userId);
         if (updatedTask.isPresent()) {
             return ResponseEntity.ok(updatedTask.get());

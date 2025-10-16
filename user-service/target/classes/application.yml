@@ -19,7 +19,7 @@ spring:
         format_sql: true
 
 jwt:
-  secret: ${JWT_SECRET:mySecretKey}
+  secret: ${JWT_SECRET:Xc7aKc5h5mHqC2o5hnbxMSp9O9W5hZ8zQ0bnzVJ+5sr3jH/4CflThYqRAG9Xk7zi}
   expiration: ${JWT_EXPIRATION:86400000}
 
 logging:

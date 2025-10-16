@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginForm({ onSuccess }) {
   const { login } = useAuth();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -13,7 +13,7 @@ export default function LoginForm({ onSuccess }) {
     setLoading(true);
     setError('');
     try {
-      await login(email, password);
+      await login(username, password);
       if (onSuccess) onSuccess();
     } catch (err) {
       setError(err?.response?.data?.message || 'Login failed');
@@ -27,8 +27,8 @@ export default function LoginForm({ onSuccess }) {
       <h2 className="mb-3">Login</h2>
       {error && <div className="alert alert-danger">{error}</div>}
       <div className="mb-3">
-        <label className="form-label">Email</label>
-        <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <label className="form-label">Username</label>
+        <input type="text" className="form-control" value={username} onChange={(e) => setUsername(e.target.value)} required />
       </div>
       <div className="mb-3">
         <label className="form-label">Password</label>

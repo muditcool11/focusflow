@@ -9,9 +9,9 @@ export default function TaskList({ tasks, onEdit, onDelete, filters, onChangeFil
             <label className="form-label">Status</label>
             <select className="form-select" value={filters.status} onChange={(e) => onChangeFilters({ ...filters, status: e.target.value })}>
               <option value="">All</option>
-              <option value="PENDING">Pending</option>
+              <option value="TODO">Pending</option>
               <option value="IN_PROGRESS">In Progress</option>
-              <option value="COMPLETED">Completed</option>
+              <option value="DONE">Completed</option>
             </select>
           </div>
           <div className="col-md-6">

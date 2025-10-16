@@ -3,8 +3,10 @@ E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\s
 E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\security\SecurityConfig.java
 E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\service\TaskService.java
 E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\entity\Priority.java
+E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\controller\GlobalExceptionHandler.java
 E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\entity\Status.java
 E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\repository\TaskRepository.java
 E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\controller\TaskController.java
+E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\dto\CreateTaskRequest.java
 E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\TaskServiceApplication.java
 E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\util\JwtUtil.java

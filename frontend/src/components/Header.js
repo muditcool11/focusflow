@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Header() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
   const navigate = useNavigate();
 
   function onLogout() {
@@ -21,9 +21,12 @@ export default function Header() {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
             {isAuthenticated ? (
-              <li className="nav-item">
-                <button className="btn btn-outline-light" onClick={onLogout}>Logout</button>
-              </li>
+              <>
+                <li className="nav-item nav-link text-light">{`Hi ${user?.username || ''}`}</li>
+                <li className="nav-item">
+                  <button className="btn btn-outline-light" onClick={onLogout}>Logout</button>
+                </li>
+              </>
             ) : (
               <>
                 <li className="nav-item">

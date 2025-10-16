@@ -16,6 +16,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     
     List<Task> findByUserIdAndStatus(Long userId, Status status);
     
+    List<Task> findByUserIdAndPriority(Long userId, com.example.taskservice.entity.Priority priority);
+    
     @Query("SELECT t FROM Task t WHERE t.userId = :userId AND t.dueDate < :currentDate AND t.status != 'DONE'")
     List<Task> findOverdueTasksByUserId(@Param("userId") Long userId, @Param("currentDate") java.time.LocalDateTime currentDate);
     

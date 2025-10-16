@@ -38,6 +38,31 @@ public class JwtUtil {
                 .getBody()
                 .getSubject();
     }
+
+    // Extract numeric userId claim if present; otherwise return null.
+    public Long getUserIdFromToken(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            Object idObj = claims.get("userId");
+            if (idObj instanceof Number) {
+                return ((Number) idObj).longValue();
+            }
+            if (idObj instanceof String) {
+                try {
+                    return Long.parseLong((String) idObj);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
     
     public boolean validateToken(String token) {
         try {

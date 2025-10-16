@@ -64,6 +64,10 @@ public class TaskService {
     public List<Task> getTasksByStatus(Long userId, Status status) {
         return taskRepository.findByUserIdAndStatus(userId, status);
     }
+
+    public List<Task> getTasksByPriority(Long userId, com.example.taskservice.entity.Priority priority) {
+        return taskRepository.findByUserIdAndPriority(userId, priority);
+    }
     
     public List<Task> getOverdueTasks(Long userId) {
         return taskRepository.findOverdueTasksByUserId(userId, LocalDateTime.now());

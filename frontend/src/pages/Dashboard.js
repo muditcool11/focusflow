@@ -11,24 +11,30 @@ export default function Dashboard() {
   const [filters, setFilters] = useState({ status: '', priority: '' });
   const [editing, setEditing] = useState(null);
 
-  async function load() {
+  const load = React.useCallback(async () => {
     setLoading(true);
     setError('');
     try {
       const data = await fetchTasks(filters);
-      setTasks(Array.isArray(data) ? data : data?.content || []);
+      const items = Array.isArray(data) ? data : data?.content || [];
+      setTasks(items);
     } catch (err) {
-      setError(err?.response?.data?.message || 'Failed to load tasks');
+      // Backend may return { error: '...' } or { message: '...' }
+      const backendMsg = err?.response?.data?.message || err?.response?.data?.error;
+      setError(backendMsg || 'Failed to load tasks');
+      // Keep console log for debugging network/401 issues
+      // eslint-disable-next-line no-console
+      console.error('Failed to load tasks', err?.response || err);
     } finally {
       setLoading(false);
     }
-  }
+  }, [filters]);
 
   useEffect(() => {
     load();
-  }, [filters.status, filters.priority]);
+  }, [filters.status, filters.priority, load]);
 
-  async function handleSave(task) {
+  const handleSave = React.useCallback(async (task) => {
     try {
       if (editing) {
         await updateTask(editing.id, task);
@@ -40,9 +46,9 @@ export default function Dashboard() {
     } catch (err) {
       alert(err?.response?.data?.message || 'Save failed');
     }
-  }
+  }, [editing, load]);
 
-  async function handleDelete(id) {
+  const handleDelete = React.useCallback(async (id) => {
     if (!window.confirm('Delete this task?')) return;
     try {
       await deleteTask(id);
@@ -50,7 +56,7 @@ export default function Dashboard() {
     } catch (err) {
       alert(err?.response?.data?.message || 'Delete failed');
     }
-  }
+  }, [load]);
 
   const body = useMemo(() => (
     <div className="container">
@@ -68,7 +74,7 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
-  ), [tasks, loading, error, filters, editing]);
+  ), [tasks, loading, error, filters, editing, handleDelete, handleSave]);
 
   return (
     <>

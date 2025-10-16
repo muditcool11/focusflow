@@ -17,7 +17,7 @@ export default function RegisterForm({ onSuccess }) {
       await register(name, email, password);
       if (onSuccess) onSuccess();
     } catch (err) {
-      setError(err?.response?.data?.message || 'Registration failed');
+      setError(err?.response?.data?.message || err?.response?.data?.error || 'Registration failed');
     } finally {
       setLoading(false);
     }

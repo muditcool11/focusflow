@@ -12,7 +12,17 @@ export function AuthProvider({ children }) {
     const stored = getToken();
     if (stored) {
       setTokenState(stored);
-      // Optionally decode token to get user info
+      // Decode token to get user info (subject or username claim)
+      try {
+        const parts = stored.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+          const username = payload?.username || payload?.sub || payload?.name;
+          setUser({ username });
+        }
+      } catch (e) {
+        // ignore decode errors
+      }
     }
   }, []);
 
@@ -20,30 +30,40 @@ export function AuthProvider({ children }) {
     const jwt = data?.token || data?.accessToken || data;
     setToken(jwt);
     setTokenState(jwt);
+    try {
+      const parts = jwt.split('.');
+      if (parts.length === 3) {
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        const username = payload?.username || payload?.sub || payload?.name;
+        setUser({ username });
+      }
+    } catch (e) {
+      // ignore
+    }
   }
 
-  async function login(email, password) {
+  const login = React.useCallback(async (email, password) => {
     const data = await apiLogin(email, password);
     handleLoginSuccess(data);
     return data;
-  }
+  }, []);
 
-  async function register(name, email, password) {
+  const register = React.useCallback(async (name, email, password) => {
     const data = await apiRegister(name, email, password);
     // Some backends return token on register; handle if present
     if (data?.token || data?.accessToken) {
       handleLoginSuccess(data);
     }
     return data;
-  }
+  }, []);
 
-  function logout() {
+  const logout = React.useCallback(() => {
     clearToken();
     setTokenState(null);
     setUser(null);
-  }
+  }, []);
 
-  const value = useMemo(() => ({ token, user, login, register, logout, isAuthenticated: !!token }), [token, user]);
+  const value = useMemo(() => ({ token, user, login, register, logout, isAuthenticated: !!token }), [token, user, login, register, logout]);
 
   return (
     <AuthContext.Provider value={value}>

@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 
 export default function TaskForm({ initialTask, onSave, onCancel }) {
   const [title, setTitle] = useState('');
-  const [status, setStatus] = useState('PENDING');
+  const [status, setStatus] = useState('TODO');
   const [priority, setPriority] = useState('MEDIUM');
 
   useEffect(() => {
     if (initialTask) {
       setTitle(initialTask.title || '');
-      setStatus(initialTask.status || 'PENDING');
+      setStatus(initialTask.status || 'TODO');
       setPriority(initialTask.priority || 'MEDIUM');
     }
   }, [initialTask]);
@@ -28,9 +28,9 @@ export default function TaskForm({ initialTask, onSave, onCancel }) {
         <div className="col-md-3">
           <label className="form-label">Status</label>
           <select className="form-select" value={status} onChange={(e) => setStatus(e.target.value)}>
-            <option value="PENDING">Pending</option>
+            <option value="TODO">Todo</option>
             <option value="IN_PROGRESS">In Progress</option>
-            <option value="COMPLETED">Completed</option>
+            <option value="DONE">Completed</option>
           </select>
         </div>
         <div className="col-md-3">
