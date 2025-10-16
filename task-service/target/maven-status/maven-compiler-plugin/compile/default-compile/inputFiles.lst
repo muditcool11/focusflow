@@ -1,0 +1,10 @@
+E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\entity\Task.java
+E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\security\JwtAuthenticationFilter.java
+E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\security\SecurityConfig.java
+E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\service\TaskService.java
+E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\entity\Priority.java
+E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\entity\Status.java
+E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\repository\TaskRepository.java
+E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\controller\TaskController.java
+E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\TaskServiceApplication.java
+E:\Resume Project\focusflow\task-service\src\main\java\com\example\taskservice\util\JwtUtil.java
