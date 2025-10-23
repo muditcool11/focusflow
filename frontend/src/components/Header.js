@@ -22,6 +22,9 @@ export default function Header() {
           <ul className="navbar-nav ms-auto">
             {isAuthenticated ? (
               <>
+                <li className="nav-item me-2">
+                  <Link className="nav-link text-light" to="/profile">Profile</Link>
+                </li>
                 <li className="nav-item nav-link text-light">{`Hi ${user?.username || ''}`}</li>
                 <li className="nav-item">
                   <button className="btn btn-outline-light" onClick={onLogout}>Logout</button>

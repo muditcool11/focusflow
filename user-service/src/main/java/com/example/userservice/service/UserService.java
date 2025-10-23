@@ -72,6 +72,37 @@ public class UserService implements UserDetailsService {
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
+
+    public void updateEmail(String username, String newEmail) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isEmpty()) {
+            throw new RuntimeException("User not found");
+        }
+        // Check if email in use by another user
+        Optional<User> existing = userRepository.findByEmail(newEmail);
+        if (existing.isPresent() && !existing.get().getUsername().equals(username)) {
+            throw new RuntimeException("Email is already in use");
+        }
+
+        User user = optionalUser.get();
+        user.setEmail(newEmail);
+        userRepository.save(user);
+    }
+
+    public void changePassword(String username, String oldPassword, String newPassword) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isEmpty()) {
+            throw new RuntimeException("User not found");
+        }
+
+        User user = optionalUser.get();
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("Old password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
     
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
