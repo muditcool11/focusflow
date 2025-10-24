@@ -70,12 +70,20 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    // Allow only the local frontend origins used in development. Avoid wildcard when credentials are involved.
-    configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173"));
+    // Allow origins can be configured via the ALLOWED_ORIGINS environment variable (comma-separated).
+    // Default to common local dev origins plus the Vercel frontend host used in production.
+    String env = System.getenv("ALLOWED_ORIGINS");
+    List<String> allowedOrigins = (env != null && !env.isBlank())
+            ? Arrays.asList(env.split(","))
+            : List.of("http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173", "https://focusflow-lemon-omega.vercel.app");
+
+    configuration.setAllowedOrigins(allowedOrigins);
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(List.of("*"));
-    // Not using cookies; keep credentials disabled to allow Access-Control-Allow-Origin to be returned safely.
-    configuration.setAllowCredentials(false);
+    // Allow Authorization and common headers so Authorization preflight succeeds
+    configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+    // Do not allow cookies by default; set ALLOW_CREDENTIALS env var if you need cookie auth
+    String allowCred = System.getenv("ALLOW_CREDENTIALS");
+    configuration.setAllowCredentials("true".equalsIgnoreCase(allowCred));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -87,10 +95,15 @@ public class SecurityConfig {
     public FilterRegistrationBean<CorsFilter> corsFilterRegistration() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173"));
+        String env = System.getenv("ALLOWED_ORIGINS");
+        List<String> allowedOrigins = (env != null && !env.isBlank())
+                ? Arrays.asList(env.split(","))
+                : Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173", "https://focusflow-lemon-omega.vercel.app");
+        config.setAllowedOrigins(allowedOrigins);
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(Arrays.asList("*"));
-        config.setAllowCredentials(false);
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+        String allowCred = System.getenv("ALLOW_CREDENTIALS");
+        config.setAllowCredentials("true".equalsIgnoreCase(allowCred));
         source.registerCorsConfiguration("/**", config);
         FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
         bean.setOrder(0);
