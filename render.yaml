@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: focusflow-task
+    env: java
+    rootDir: task-service
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -jar target/*.jar
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:mysql://turntable.proxy.rlwy.net:11369/railway
+      - key: SPRING_DATASOURCE_USERNAME
+        value: root
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: XrtwIilnbGHDnYYDTcSZgKQyAFIaFTTN
+      - key: JWT_SECRET
+        value: Xc7aKc5h5mHqC2o5hnbxMSp9O9W5hZ8zQ0bnzVJ+5sr3jH/4CflThYqRAG9Xk7zi
+      - key: JWT_EXPIRATION_MS
+        value: 86400000
