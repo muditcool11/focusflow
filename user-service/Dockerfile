@@ -1,26 +1,28 @@
-# Use OpenJDK 17 as base image
-FROM openjdk:17-jdk-slim
+## Multi-stage Dockerfile: build with official Maven image, run with lightweight JRE
 
-# Set working directory
+### Build stage ###
+FROM maven:3.9.5-eclipse-temurin-17 AS build
+
+WORKDIR /workspace
+
+# Copy POM first to leverage Docker layer caching for dependencies
+COPY pom.xml ./
+
+# Copy source
+COPY src ./src
+
+# Build the application (skip tests for faster build)
+RUN mvn -B -f pom.xml clean package -DskipTests
+
+
+### Runtime stage ###
+FROM eclipse-temurin:17-jre-jammy
+
 WORKDIR /app
 
-# Copy Maven wrapper and pom.xml
-COPY mvnw .
-COPY mvnw.cmd .
-COPY .mvn .mvn
-COPY pom.xml .
+# Copy the built jar from the build stage
+COPY --from=build /workspace/target/user-service-0.0.1-SNAPSHOT.jar ./user-service.jar
 
-# Copy source code
-COPY src src
-
-# Make Maven wrapper executable
-RUN chmod +x ./mvnw
-
-# Build the application
-RUN ./mvnw clean package -DskipTests
-
-# Expose port 8081
 EXPOSE 8081
 
-# Run the application
-CMD ["java", "-jar", "target/user-service-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "/app/user-service.jar"]
